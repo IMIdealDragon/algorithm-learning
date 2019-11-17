@@ -1,4 +1,4 @@
-# DFS + 递归问题
+# 算法题
 
 [TOC]
 
@@ -634,6 +634,84 @@ public:
 };
 ```
 
+### 序列化与反序列化二叉树
+
+请实现两个函数，分别用来序列化和反序列化二叉树。
+
+您需要确保二叉树可以序列化为字符串，并且可以将此字符串反序列化为原始树结构。
+
+**样例**
+
+```
+你可以序列化如下的二叉树
+    8
+   / \
+  12  2
+     / \
+    6   4
+
+为："[8, 12, 2, null, null, 6, 4, null, null, null, null]"
+```
+
+**注意**:
+
+- 以上的格式是AcWing序列化二叉树的方式，你不必一定按照此格式，所以可以设计出一些新的构造方式。
+
+```cpp
+class Solution {
+public:
+    void dfs(TreeNode *root, string& ans)
+    {
+        if(root == NULL)
+            ans += "#!";
+        else
+        {
+            ans += to_string(root->val) + "!";
+            dfs(root->left, ans);
+            dfs(root->right, ans);
+        }
+    }
+    char* Serialize(TreeNode *root) {    
+        string ans;
+        dfs(root, ans); 
+       // char* ret = const_cast<char*>(ans.c_str());这句代码错误，不能这么写
+        char *ret = new char[ans.length() + 1];
+        strcpy(ret, const_cast<char*>(ans.c_str()));
+        return ret;
+    }
+    TreeNode* Deserialize(char *str) {
+        string s(str);
+        int u = 0;
+        return dfsd(u, s);
+    }
+    
+    TreeNode* dfsd(int& u, string& data)
+    {
+       if(u == data.size()) return NULL;
+        int k = u ;
+        while(data[k] != '!') k++;
+        if (data[u] == '#') {
+            u = k + 1;
+            return NULL;
+        }
+        int sum = 0;
+        bool flag = true;
+        //如果是有数字的话，取出这个数字
+        if(data[u] == '-') {flag = false; u++;}//处理一下负号
+        for (int i = u; i < k; i ++) {
+            sum = sum * 10 + data[i] - '0';
+        }
+
+        if(flag == false) sum = -sum;
+        u = k + 1;
+        auto root = new TreeNode(sum);
+        root->left = dfsd(u, data);
+        root->right = dfsd(u, data);
+        return root;
+    }
+};
+```
+
 
 
 ## 排序专题
@@ -738,5 +816,109 @@ public:
        return right;
    }
 };
+```
+
+## 二分法
+
+首先要观察题目是不是查找的题目，查找的题目就有可能用二分，二分的话还要求数组有序。一般都是有序数组才用二分。
+
+二分可能出错的地方：区间为空，答案不存在，有重复元素，开闭的上下界。。
+
+第一步是选择mid，mid选择的时候，有两种，一种是较小的中位数 ` l+(l + r) / 2`一种是较大的中位数`l+(l+r+1) / 2`
+
+第二步是考虑这个判断条件（这个根据具体的题目要好好考虑），主要是要将区间往目标方向收缩
+
+第三步，是根据条件，选择左右区间收缩，这个时候，如果是r=mid,则修正第一步中的中位数，要取较小值，不然的话，只有两个值的时候，一直是r=mid，一直循环，无法让l=r。同理，r = mid -  1的时候，要用较大中位数。
+
+先给出最经典的模板题
+
+### 二分模板题
+
+找一个有序数组中的匹配值，分别找出最左位置和最右位置
+
+```cpp
+#include <iostream>
+#include <vector>
+
+using namespace std;
+
+//要找target最左的位置，则当取得target等号的时候，我的区间应该是往右走，且是包含这个值
+//所以是r=mid，为了防止死循环，mid取较小中位数
+int bsearchl(vector<int>& nums, int target)
+{
+    int l = 0, r = nums.size() - 1;
+    while(l < r)
+    {
+        int mid = l + (r - l )/2;//取中位数偏大
+        if(nums[mid] >= target) r = mid;//如果只有两个，r=mid就死循环
+        else
+            l = mid + 1;
+    }
+    return l;
+}
+
+int bsearchr(vector<int>& nums, int target)
+{
+    int l = 0, r = nums.size() - 1;
+    while(l < r)
+    {
+        int mid = l + (r - l + 1) / 2;
+        if(nums[mid] > target) r = mid - 1;
+        else
+            l = mid;
+    }
+    return l;
+}
+int main()
+{
+    vector<int> t = {1,2,3,4,4,4,5,6,7,8};
+    int al = bsearchl(t,4);
+    cout << al << endl;
+    int ar = bsearchr(t,4);
+    cout << ar << endl;
+    return 0;
+}
+```
+
+### 等比数列求缺失项，有一个等比数列，其中缺失了一项这项不是首尾，请求出这一项，要求O（logN）
+
+这道题是采用二分查找的方式，判断的方法是拿l，r，mid去做比值，看谁的比值比较大，缺失项一定是在大的那个区间，如果是相等的，那一定就是在数量少的那一侧，因为当偶数的时候，数量会不平衡。
+
+这道题因为目标值时缺项，所以l和r中间夹起来比较好，不然容易丢失
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <math.h>
+using namespace std;
+
+int getMissingNumber(vector<int>& nums)
+{
+	if (nums.empty())
+		return 0;
+	int l = 0, r = nums.size() - 1;
+	if (nums[l] == nums[r]) return nums[l];
+	while (l < r - 1)
+	{
+		int mid = l + (r - l) / 2;//取左边的中位数
+		//现在是左边的数量少，如果左右的比值相同，左边有缺项
+ 		if (nums[mid] / nums[l] >= nums[r] / nums[mid])
+			r = mid;//相等的点
+		else
+			l = mid;
+	}
+	return sqrt(nums[l] * nums[r]);
+};
+
+
+int main()
+{
+	vector<int> test = { 1,2};
+
+	int ans1 = getMissingNumber(test);
+	cout << ans1 << endl;
+
+	return 0;
+}
 ```
 
