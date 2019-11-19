@@ -712,6 +712,143 @@ public:
 };
 ```
 
+### 二叉搜索树的第k个结点
+
+给定一棵二叉搜索树，请找出其中的第k小的结点。
+
+你可以假设树和k都存在，并且1≤k≤树的总结点数。
+
+样例
+
+```
+输入：root = [2, 1, 3, null, null, null, null] ，k = 3
+
+    2
+   / \
+  1   3
+
+输出：3
+```
+
+```cpp
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    TreeNode *ans;
+    void dfs(TreeNode* root, int& k)
+    {
+        if(!root) return;//如果遍历到空节点
+        if(root->left) dfs(root->left, k);//先搜左子树
+        k--;
+        if(k == 0)
+            ans = root;        
+        if(k >= 0 && root->right) dfs(root->right, k);
+    }
+    TreeNode* kthNode(TreeNode* root, int k) {
+        dfs(root, k);
+        return ans;
+    }
+};
+```
+
+### 二叉树的深度
+
+输入一棵二叉树的根结点，求该树的深度。
+
+从根结点到叶结点依次经过的结点（含根、叶结点）形成树的一条路径，最长路径的长度为树的深度。
+
+样例
+
+```
+输入：二叉树[8, 12, 2, null, null, 6, 4, null, null, null, null]如下图所示：
+    8
+   / \
+  12  2
+     / \
+    6   4
+
+输出：3
+```
+
+```cpp
+class Solution {
+public:
+    int treeDepth(TreeNode* root) {
+        if(!root) return 0;       
+        return max(treeDepth(root->left), treeDepth(root->right)) + 1; 
+    }
+};
+```
+
+输入一棵二叉搜索树，将该二叉搜索树转换成一个排序的双向链表。
+
+要求不能创建任何新的结点，只能调整树中结点指针的指向。
+
+**注意**：
+
+- 需要返回双向链表最左侧的节点。
+
+例如，输入下图中左边的二叉搜索树，则输出右边的排序双向链表。
+
+![19_23bee494f5-QQ截图20181202052830](D:\A_目标！！！\algorithm\algorithm-learning\review\pic\19_23bee494f5-QQ截图20181202052830.png)
+
+```cpp
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+ //把二叉树分为三部分 分别是左子树B，根A，右子树C
+ //让B<-A->C
+ //我们每次递归返回左子树的最左和最右一对pair
+class Solution {
+public:
+    TreeNode* convert(TreeNode* root) {
+        if(!root) return NULL;
+        auto sides = dfs(root);
+        return sides.first;
+    }
+    
+    pair<TreeNode *,TreeNode *> dfs(TreeNode* root)
+    {
+        if(!root->left && !root->right) return {root, root};
+        if(root->left && root->right)
+        {
+            auto lsides = dfs(root->left), rsides = dfs(root->right);
+            lsides.second->right = root, rsides.first->left = root;
+            root->left = lsides.second, root->right = rsides.first;
+            return {lsides.first, rsides.second};
+        }
+        if(root->left)
+        {
+            auto lsides = dfs(root->left);
+            lsides.second->right = root;
+            root->left = lsides.second;
+            return {lsides.first, root};
+        }
+        if(root->right)
+        {
+            auto rsides = dfs(root->right);
+            rsides.first->left = root;
+            root->right = rsides.first;
+            return {root, rsides.second};
+        }
+    }
+};
+```
+
 
 
 ## 排序专题
