@@ -1,3 +1,4 @@
+```cpp
 // 快速排序算法模板
 void quick_sort(int q[], int l, int r)
 {
@@ -13,7 +14,6 @@ void quick_sort(int q[], int l, int r)
     }
     quick_sort(q, l, j), quick_sort(q, j + 1, r);
 }
-
 // 归并排序算法模板
 void merge_sort(int q[], int l, int r)
 {
@@ -161,3 +161,4 @@ vector<int> div(vector<int> &A, int b, int &r)
 // 二维差分
 // 给以(x1, y1)为左上角，(x2, y2)为右下角的子矩阵中的所有元素加上c：
 // S[x1, y1] += c, S[x2 + 1, y1] -= c, S[x1, y2 + 1] -= c, S[x2 + 1, y2 + 1] += c
+```
