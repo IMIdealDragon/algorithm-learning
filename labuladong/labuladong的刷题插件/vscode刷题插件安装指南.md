@@ -1,0 +1,1 @@
+不喜欢在网页刷题的读者，可以安装 vscode 插件，其功能和 Chrome 插件相同，安装及功能手册 [请看这里](https://mp.weixin.qq.com/s/z4mqiiJV9pZ3t6SIPa2kTA)。
